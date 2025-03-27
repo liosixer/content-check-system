@@ -13,7 +13,7 @@ const ImageReview = dynamic(() => import('@/components/ImageReview'), {
   loading: () => <p>加载中...</p>
 });
 
-export default function Home() {
+export default function HomePage() {
   const [tabValue, setTabValue] = useState(0);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
