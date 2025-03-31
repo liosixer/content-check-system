@@ -1,5 +1,7 @@
 import https from 'https';
 import qs from 'querystring';
+import fs from 'fs';
+import path from 'path';
 
 const API_KEY = process.env.NEXT_PUBLIC_BAIDU_API_KEY;
 const SECRET_KEY = process.env.NEXT_PUBLIC_BAIDU_SECRET_KEY;
@@ -72,16 +74,34 @@ class BaiduApiService {
   }
 
   private async fileToBase64(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = () => {
-        const base64 = reader.result as string;
-        // 移除 data:image/jpeg;base64, 前缀
-        resolve(base64.split(',')[1]);
-      };
-      reader.onerror = error => reject(error);
-    });
+    try {
+      // 创建临时文件
+      const tempDir = path.join(process.cwd(), 'temp');
+      if (!fs.existsSync(tempDir)) {
+        fs.mkdirSync(tempDir);
+      }
+      
+      const tempFilePath = path.join(tempDir, `temp-${Date.now()}.jpg`);
+      
+      // 将 File 对象转换为 Buffer
+      const arrayBuffer = await file.arrayBuffer();
+      const buffer = Buffer.from(arrayBuffer);
+      
+      // 写入临时文件
+      fs.writeFileSync(tempFilePath, buffer);
+      
+      // 读取文件并转换为 base64
+      const fileData = fs.readFileSync(tempFilePath);
+      const base64 = fileData.toString('base64');
+      
+      // 删除临时文件
+      fs.unlinkSync(tempFilePath);
+      
+      return base64;
+    } catch (error) {
+      console.error('文件转换失败:', error);
+      throw new Error('文件转换失败');
+    }
   }
 
   public async imageCensor(file: File) {
@@ -100,7 +120,11 @@ class BaiduApiService {
         }
       );
 
-      return await response.json();
+      const result = await response.json();
+      if (result.error_code) {
+        throw new Error(result.error_msg || '图片审核失败');
+      }
+      return result;
     } catch (error) {
       console.error('图片审核失败:', error);
       throw new Error('图片审核失败');
@@ -108,4 +132,4 @@ class BaiduApiService {
   }
 }
 
-export const baiduApi = BaiduApiService.getInstance();
+export default BaiduApiService;

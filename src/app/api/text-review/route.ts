@@ -1,9 +1,10 @@
 import { NextResponse } from 'next/server';
-import { baiduApi } from '@/services/baiduApi';
+import BaiduApiService from '@/services/baiduApi';
 
 export async function POST(request: Request) {
   try {
     const { text } = await request.json();
+    const baiduApi = BaiduApiService.getInstance();
     const result = await baiduApi.textCensor(text);
 
     // 处理百度API返回结果
@@ -14,7 +15,7 @@ export async function POST(request: Request) {
   } catch (error) {
     console.error('文本审核失败:', error);
     return NextResponse.json(
-      { error: '审核请求失败' },
+      { error: error instanceof Error ? error.message : '审核请求失败' },
       { status: 500 }
     );
   }
