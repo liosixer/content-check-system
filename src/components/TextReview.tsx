@@ -60,7 +60,7 @@ export default function TextReview() {
   }, []);
 
   const loadRules = () => {
-    fetch('/assets/text_check.csv')
+    fetch('/ec_ccs/assets/text_check.csv')
       .then(response => response.text())
       .then(csvText => {
         Papa.parse<CsvRow>(csvText, {
@@ -107,7 +107,7 @@ export default function TextReview() {
       ].map(row => row.join(',')).join('\n');
 
       // 保存到服务器
-      const response = await fetch('/api/save-rules', {
+      const response = await fetch('/ec_ccs/api/save-rules', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -158,7 +158,7 @@ export default function TextReview() {
         return;
       }
 
-      const response = await fetch('/api/text-review', {
+      const response = await fetch('/ec_ccs/api/text-review', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
