@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
+  basePath: '/ec_ccs',
   experimental: {
     serverActions: true,
   },
